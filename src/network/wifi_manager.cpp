@@ -154,6 +154,7 @@ void WifiManager::setupCaptivePortal() {
     // Never leak actual token in cleartext HTML source
     html.replace("%HA_TOKEN_PLACEHOLDER%", (_haToken.length() > 0) ? "•••••••••••••••• (Token configured)" : "Bearer token from your HA Profile");
     html.replace("%HA_ENTITY%", _haEntity);
+    html.replace("%HARDWARE_MODEL%", HARDWARE_MODEL);
     server.send(200, "text/html", html);
   });
 
@@ -228,6 +229,7 @@ void WifiManager::setupCaptivePortal() {
     doc["min_free_heap"] = ESP.getMinFreeHeap();
     doc["max_alloc_heap"] = ESP.getMaxAllocHeap();
     doc["chip_model"] = ESP.getChipModel();
+    doc["hardware_model"] = HARDWARE_MODEL;
     doc["cpu_freq_mhz"] = ESP.getCpuFreqMHz();
     doc["uptime_s"] = millis() / 1000;
     doc["version"] = APP_VERSION;
@@ -248,18 +250,23 @@ void WifiManager::setupCaptivePortal() {
   });
 
   // Web OTA Firmware Update
+  static bool otaUploadSuccess = false;
+
   server.on("/update", HTTP_POST, [this]() {
     server.sendHeader("Connection", "close");
-    if (!Update.hasError()) {
+    if (otaUploadSuccess && !Update.hasError()) {
+      otaUploadSuccess = false;
       server.send(200, "application/json", "{\"success\":true,\"message\":\"Firmware update successful! Rebooting...\"}");
       delay(500);
       ESP.restart();
     } else {
-      server.send(500, "application/json", "{\"success\":false,\"message\":\"Firmware update failed.\"}");
+      otaUploadSuccess = false;
+      server.send(500, "application/json", "{\"success\":false,\"message\":\"Firmware update failed or no file provided.\"}");
     }
   }, [this]() {
     HTTPUpload& upload = server.upload();
     if (upload.status == UPLOAD_FILE_START) {
+      otaUploadSuccess = false;
       Serial.printf("[OTA] Web Update Start: %s\n", upload.filename.c_str());
       esp_task_wdt_reset();
       if (!Update.begin(UPDATE_SIZE_UNKNOWN)) {
@@ -273,8 +280,10 @@ void WifiManager::setupCaptivePortal() {
     } else if (upload.status == UPLOAD_FILE_END) {
       esp_task_wdt_reset();
       if (Update.end(true)) {
+        otaUploadSuccess = true;
         Serial.printf("[OTA] Web Update Complete: %u bytes\n", upload.totalSize);
       } else {
+        otaUploadSuccess = false;
         Update.printError(Serial);
       }
     }

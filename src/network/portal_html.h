@@ -87,7 +87,7 @@ static const char PORTAL_HTML[] PROGMEM = R"rawliteral(<!DOCTYPE html>
   <div class="header">
     <div>
       <h1>CYD HA Dashboard</h1>
-      <div style="font-size:12px;color:var(--text-muted);">ESP32-2432S028R &bull; Phase 4 Web Portal</div>
+      <div style="font-size:12px;color:var(--text-muted);"><span id="header-hw-model">%HARDWARE_MODEL%</span> &bull; Web Portal</div>
     </div>
     <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end;">
       <span class="badge" id="ha-badge">HA: Checking...</span>
@@ -183,6 +183,10 @@ static const char PORTAL_HTML[] PROGMEM = R"rawliteral(<!DOCTYPE html>
     <div class="card">
       <div class="card-title">Device Status</div>
       <div class="stat-grid">
+        <div class="stat-card">
+          <div class="stat-label">Hardware Model</div>
+          <div class="stat-val" id="stat-hw" style="font-size:12px;font-weight:600;">%HARDWARE_MODEL%</div>
+        </div>
         <div class="stat-card">
           <div class="stat-label">Device IP</div>
           <div class="stat-val" id="stat-ip">--</div>
@@ -856,6 +860,12 @@ function loadStatus() {
     .then(function(d){
       document.getElementById('stat-ip').textContent = d.ip || '--';
       document.getElementById('stat-rssi').textContent = (d.wifi_rssi || '--') + ' dBm';
+      if (d.hardware_model) {
+        var hwEl = document.getElementById('stat-hw');
+        if (hwEl) hwEl.textContent = d.hardware_model;
+        var hdrHw = document.getElementById('header-hw-model');
+        if (hdrHw) hdrHw.textContent = d.hardware_model;
+      }
       document.getElementById('stat-heap').textContent = Math.round((d.free_heap || 0) / 1024) + ' KB';
       var minEl = document.getElementById('stat-min-heap');
       if (minEl && d.min_free_heap) {
