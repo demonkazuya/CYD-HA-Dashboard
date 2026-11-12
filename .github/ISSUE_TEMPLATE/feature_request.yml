@@ -1,19 +1,19 @@
 name: "💡 Feature Request"
-description: Suggest an idea, new entity type, or improvement for CYD-HA-Dashboard
+description: Suggest an idea or feature for CYD-HA-Dashboard
 title: "[Feature]: "
 labels: ["enhancement"]
 body:
   - type: markdown
     attributes:
       value: |
-        Thank you for suggesting an improvement! Please provide details about the widget, layout, or feature you'd like to see.
+        Thank you for suggesting a feature! Please provide as much detail as possible about what you'd like to see (new Home Assistant domain controls, widget types, gestures, themes, or integrations).
 
   - type: textarea
     id: problem
     attributes:
-      label: Is your feature request related to a problem or limitation?
-      description: A clear and concise description of the limitation (e.g. "Currently CYD-HA-Dashboard doesn't support...").
-      placeholder: "Describe the limitation or use case..."
+      label: Is your feature request related to a problem?
+      description: A clear and concise description of the problem or limitation (e.g., "I'm always frustrated when...").
+      placeholder: "Describe the limitation..."
     validations:
       required: false
 
@@ -29,8 +29,8 @@ body:
   - type: textarea
     id: alternatives
     attributes:
-      label: Alternative Solutions or Mockups
-      description: Any alternative ideas you've considered, or UI mockups/screenshots.
+      label: Alternative Solutions or Context
+      description: Any alternative solutions or features you've considered, mockups, or screenshots.
       placeholder: "Any additional context..."
     validations:
       required: false

@@ -1,19 +1,19 @@
 name: "❓ Support / Question"
-description: Ask for help with hardware, flashing, Wi-Fi, or Home Assistant setup
+description: Ask for help getting CYD-HA-Dashboard flashed, configured, or connected to Home Assistant
 title: "[Question]: "
 labels: ["question"]
 body:
   - type: markdown
     attributes:
       value: |
-        Thanks for asking! Please check the [Documentation](https://github.com/demonkazuya/CYD-HA-Dashboard#readme) and [Troubleshooting Guide](https://github.com/demonkazuya/CYD-HA-Dashboard/blob/main/docs/TROUBLESHOOTING.md) first — most common setup issues (such as 2.4 GHz Wi-Fi requirements or Long-Lived Token creation) are detailed there.
+        Thanks for asking! Please check the [README](https://github.com/demonkazuya/CYD-HA-Dashboard#readme), [Setup Guide](https://github.com/demonkazuya/CYD-HA-Dashboard/blob/main/docs/SETUP.md), and [Troubleshooting Guide](https://github.com/demonkazuya/CYD-HA-Dashboard/blob/main/docs/TROUBLESHOOTING.md) first — especially the setup steps for your Home Assistant Long-Lived Access Token, 2.4 GHz Wi-Fi requirements, and touch calibration. Many common questions are answered there.
 
   - type: textarea
     id: what_trying_to_do
     attributes:
-      label: What are you trying to configure or achieve?
-      description: Describe your setup goals.
-      placeholder: "e.g., I'm trying to connect my ESP32-2432S028R to my local Home Assistant server and add climate controls..."
+      label: What are you trying to do?
+      description: Describe what you are configuring or trying to achieve.
+      placeholder: "e.g., I want to connect my ESP32-2432S028R to my Home Assistant instance and display climate and light controls..."
     validations:
       required: true
 
@@ -22,14 +22,15 @@ body:
     attributes:
       label: What have you tried so far?
       description: Steps you've already taken, and what happened.
-      placeholder: "e.g., Flashed the factory binary, connected to the setup hotspot, entered token, but screen shows..."
+      placeholder: "e.g., Flashed the factory binary, connected to the setup hotspot, entered token and server URL, but slots show offline..."
     validations:
       required: false
 
   - type: dropdown
-    id: device_model
+    id: hardware_model
     attributes:
       label: CYD / ESP32 Hardware Model
+      description: Which display board are you using?
       options:
         - "ESP32-2432S028R (2.8\" Resistive Touch - Standard CYD)"
         - "ESP32-2432S028C (2.8\" Capacitive Touch)"
@@ -44,5 +45,13 @@ body:
     attributes:
       label: Firmware Version
       placeholder: "e.g., v0.1.0"
+    validations:
+      required: false
+
+  - type: input
+    id: ha_version
+    attributes:
+      label: Home Assistant Version
+      placeholder: "e.g., 2026.11.0"
     validations:
       required: false
