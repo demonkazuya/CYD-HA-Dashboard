@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: "CYD-HA-Dashboard Releases"
+    url: "https://github.com/demonkazuya/CYD-HA-Dashboard/releases"
+    about: "Download the latest firmware binaries, factory images, and release notes"
+  - name: "Setup & Configuration Guide"
+    url: "https://github.com/demonkazuya/CYD-HA-Dashboard/blob/main/docs/SETUP.md"
+    about: "Step-by-step Home Assistant token generation and initial Wi-Fi setup"
+  - name: "Hardware Reference & Pinouts"
+    url: "https://github.com/demonkazuya/CYD-HA-Dashboard/blob/main/docs/HARDWARE.md"
+    about: "ESP32-2432S028R pinout, dedicated HSPI touch bus, and schematics"

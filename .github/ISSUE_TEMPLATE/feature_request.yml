@@ -1,0 +1,36 @@
+name: "💡 Feature Request"
+description: Suggest an idea, new entity type, or improvement for CYD-HA-Dashboard
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for suggesting an improvement! Please provide details about the widget, layout, or feature you'd like to see.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Is your feature request related to a problem or limitation?
+      description: A clear and concise description of the limitation (e.g. "Currently CYD-HA-Dashboard doesn't support...").
+      placeholder: "Describe the limitation or use case..."
+    validations:
+      required: false
+
+  - type: textarea
+    id: proposed_solution
+    attributes:
+      label: Describe the Solution You'd Like
+      description: A clear and concise description of what you want to happen.
+      placeholder: "I would like CYD-HA-Dashboard to..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternative Solutions or Mockups
+      description: Any alternative ideas you've considered, or UI mockups/screenshots.
+      placeholder: "Any additional context..."
+    validations:
+      required: false
