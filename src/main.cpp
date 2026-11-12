@@ -1504,7 +1504,8 @@ void setup() {
   Serial.begin(115200);
   delay(100);
   Serial.println("\n==================================");
-  Serial.println(" CYD HA Dashboard v0.4.0 (Phase 6)");
+  Serial.printf(" %s v%s\n", APP_NAME, APP_VERSION);
+  Serial.printf(" Hardware: %s\n", HARDWARE_MODEL);
   Serial.println("==================================");
 
   // Initialize Task Watchdog (30 second timeout, panic/reboot on lockup)
