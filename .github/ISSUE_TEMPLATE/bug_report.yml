@@ -1,14 +1,14 @@
 name: "🐛 Bug Report"
-description: Report a bug or unexpected behavior with CYD-HA-Dashboard
+description: Report a bug or issue with CYD-HA-Dashboard
 title: "[Bug]: "
 labels: ["bug"]
 body:
   - type: markdown
     attributes:
       value: |
-        Thank you for reporting an issue! Please fill out the form below as completely as possible to help us diagnose and fix it quickly.
+        Thank you for reporting an issue! Please fill out the form below as completely as possible to help us reproduce and fix it quickly.
 
-        **Before submitting:** Verify that Home Assistant is running and your entities are functioning normally in the official Home Assistant dashboard.
+        **Before you submit:** Verify that Home Assistant is running and reachable from your browser on the same local network. Check the [Troubleshooting Guide](https://github.com/demonkazuya/CYD-HA-Dashboard/blob/main/docs/TROUBLESHOOTING.md) and [Setup Guide](https://github.com/demonkazuya/CYD-HA-Dashboard/blob/main/docs/SETUP.md).
 
   - type: textarea
     id: description
@@ -28,7 +28,7 @@ body:
         1. Power on the device
         2. Navigate to '...'
         3. Tap on slot '...'
-        4. Observe behavior
+        4. Observe error
     validations:
       required: true
 
@@ -37,21 +37,21 @@ body:
     attributes:
       label: Expected vs Actual Behavior
       description: What did you expect to happen, and what happened instead?
-      placeholder: "Expected: ... \nActual: ..."
+      placeholder: "Expected: ...\nActual: ..."
     validations:
       required: true
 
   - type: textarea
-    id: context
+    id: what_were_you_doing
     attributes:
-      label: What were you doing when this occurred?
-      description: e.g., initial setup, waking from screen sleep, opening a light RGB modal, or theme switching.
-      placeholder: "e.g., Device was connected, but after opening the climate modal..."
+      label: What were you trying to do when this happened?
+      description: For example, initial Wi-Fi setup, connecting to Home Assistant server, opening a light/climate modal, switching themes, or performing an OTA update.
+      placeholder: "e.g., Device was connected, but after opening the climate modal the touch screen stopped responding..."
     validations:
       required: false
 
   - type: dropdown
-    id: device_model
+    id: hardware_model
     attributes:
       label: CYD / ESP32 Hardware Model
       description: Which display board are you using?
@@ -68,7 +68,7 @@ body:
     id: firmware_version
     attributes:
       label: Firmware Version
-      description: Version installed on the device (shown in Web Portal Tab 3 or /api/status).
+      description: Version installed on the device (shown in Web Portal System Tab or /api/status).
       placeholder: "e.g., v0.1.0"
     validations:
       required: true
@@ -77,17 +77,62 @@ body:
     id: ha_version
     attributes:
       label: Home Assistant Version
-      description: Version of your Home Assistant server (Settings → System → About).
+      description: "Version of Home Assistant (Settings → System → Repairs → ... → About, or Developer Tools → Info)."
       placeholder: "e.g., 2026.11.0"
     validations:
       required: false
 
-  - type: textarea
-    id: entity_types
+  - type: dropdown
+    id: grid_layout
     attributes:
-      label: Affected Entity Types / Domains
-      description: What domain(s) are involved? (e.g., light, fan, cover, climate, scene, switch, sensor)
-      placeholder: "e.g., light.living_room_dimmer, climate.thermostat"
+      label: Dashboard Grid Layout
+      description: Configured dashboard slot layout in web portal.
+      options:
+        - "2x2 (4 Slots - Large Widgets)"
+        - "3x2 (6 Slots - Compact Grid)"
+        - "Web Portal / Setup Stage"
+    validations:
+      required: false
+
+  - type: dropdown
+    id: theme
+    attributes:
+      label: Display Theme & Mode
+      description: Current theme applied on the device.
+      options:
+        - "Home Assistant (Dark)"
+        - "Home Assistant (Light)"
+        - "Slate Modern (Dark)"
+        - "Slate Modern (Light)"
+        - "OLED Pure Black"
+        - "OLED Clean White"
+        - "Forest Green (Dark)"
+        - "Forest Green (Light)"
+        - "Amber Retro (Dark)"
+        - "Amber Retro (Light)"
+        - "Default / Not sure"
+    validations:
+      required: false
+
+  - type: dropdown
+    id: network_status
+    attributes:
+      label: Network & Home Assistant Connectivity
+      description: Can the device connect to Wi-Fi and reach the Home Assistant REST API?
+      options:
+        - "Wi-Fi connected and Home Assistant reachable from browser"
+        - "Wi-Fi connected but Home Assistant API unreachable from CYD"
+        - "Cannot connect to Wi-Fi (Setup Hotspot active)"
+        - "Not sure"
+    validations:
+      required: true
+
+  - type: textarea
+    id: affected_entities
+    attributes:
+      label: Affected Entity IDs / Domains
+      description: Entity ID(s) and domains involved (e.g. light, switch, fan, cover, climate, sensor, scene, script).
+      placeholder: "e.g., light.living_room_dimmer, climate.hallway_thermostat, cover.garage_door"
     validations:
       required: false
 
@@ -95,12 +140,13 @@ body:
     id: serial_logs
     attributes:
       label: Serial Console Logs (115200 baud)
-      description: Connect the device via USB and paste logs from PlatformIO / Serial Monitor.
+      description: Connect the CYD via USB and paste serial monitor logs. Please redact private Wi-Fi passwords and Home Assistant tokens!
       render: shell
       placeholder: |
-        [UI] Touch at (160, 120)
-        [HA] Client connected: http://192.168.1.XX:8123
-        [HA] Error: ...
+        [CYD-HA][BOOT] Starting CYD-HA-Dashboard v0.1.0...
+        [CYD-HA][WIFI] Connected: 192.168.1.XX
+        [CYD-HA][HA] Syncing 6 entities...
+        [CYD-HA][ERROR] ...
     validations:
       required: false
 
@@ -108,7 +154,7 @@ body:
     id: visual_evidence
     attributes:
       label: Screenshots / Photos
-      description: Attach photos of your CYD screen or screenshots of the Web Portal.
+      description: Drag and drop photos of the device screen or screenshots of the Web Portal / Home Assistant entities.
       placeholder: "Attach images here..."
     validations:
       required: false
@@ -118,9 +164,9 @@ body:
     attributes:
       label: Pre-Submission Checklist
       options:
-        - label: "I tested with adequate 5V power (not an underpowered USB hub or port)."
+        - label: "I verified the device has adequate 5V power (not an underpowered USB hub port)."
           required: false
-        - label: "I verified that my Home Assistant token and base URL are correct."
+        - label: "I confirmed that the Home Assistant URL and Long-Lived Access Token are valid and reachable on the local network."
           required: false
         - label: "I checked existing GitHub issues to make sure this is not a duplicate."
           required: true
