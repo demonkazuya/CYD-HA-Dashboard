@@ -4,7 +4,7 @@
 
 [![GitHub Release](https://img.shields.io/badge/Release-v0.1.0-blue.svg?style=for-the-badge)](https://github.com/demonkazuya/CYD-HA-Dashboard/releases)
 [![PlatformIO](https://img.shields.io/badge/PlatformIO-Supported-orange.svg?style=for-the-badge)](https://platformio.org/)
-[![Hardware](https://img.shields.io/badge/Hardware-ESP32--2432S028R-red.svg?style=for-the-badge)](docs/HARDWARE.md)
+[![Hardware](https://img.shields.io/badge/Hardware-ESP32--2432S028R-red.svg?style=for-the-badge)](https://github.com/demonkazuya/CYD-HA-Dashboard)
 [![Ko-fi](https://img.shields.io/badge/Ko--fi-Tip%20a%20Coffee-F16061?style=for-the-badge&logo=ko-fi&logoColor=white)](https://ko-fi.com/demonkazuya)
 
 **CYD-HA-Dashboard** is a standalone, open-source touchscreen smart home controller built for the sub-$15 **Cheap Yellow Display (ESP32-2432S028R)**. It connects directly to your local **Home Assistant** server to deliver instant touch controls, live sensor telemetries, advanced device modals, and customizable multi-page layouts.
@@ -58,8 +58,6 @@ Everything runs locally on internal flash memory (LittleFS)—no external bridge
 | **Board** | **ESP32-2432S028R** (2.8" Resistive Touch CYD, 320x240 ILI9341, XPT2046 touch, 4MB Flash) |
 | **Power** | 5V via Micro-USB, USB-C, or 2-pin JST-XH power header (~180 mA active, ~55 mA sleep) |
 | **Case** | Any standard 2.8" CYD 3D-printed enclosure or desktop stand |
-
-*See [docs/HARDWARE.md](docs/HARDWARE.md) for full schematic pinout tables and bus isolation details.*
 
 ---
 
