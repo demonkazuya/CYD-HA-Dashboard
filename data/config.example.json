@@ -1,0 +1,59 @@
+{
+  "schema_version": 1,
+  "pages": [
+    {
+      "id": "living_room",
+      "name": "Living Room",
+      "grid": "2x2",
+      "widgets": [
+        {
+          "id": "w_0",
+          "slot": 0,
+          "label": "Ceiling Light",
+          "type": "toggle",
+          "icon": "mdi:lightbulb",
+          "entity_id": "light.living_room_light"
+        },
+        {
+          "id": "w_1",
+          "slot": 1,
+          "label": "Desk Fan",
+          "type": "toggle",
+          "icon": "mdi:fan",
+          "entity_id": "fan.living_room_fan"
+        },
+        {
+          "id": "w_2",
+          "slot": 2,
+          "label": "Window Blinds",
+          "type": "toggle",
+          "icon": "mdi:blinds",
+          "entity_id": "cover.living_room_blinds"
+        },
+        {
+          "id": "w_3",
+          "slot": 3,
+          "label": "Thermostat",
+          "type": "toggle",
+          "icon": "mdi:thermostat",
+          "entity_id": "climate.living_room_thermostat"
+        }
+      ]
+    }
+  ],
+  "color_presets": [
+    "#fff1e0",
+    "#ef4444",
+    "#f59e0b",
+    "#10b981",
+    "#38bdf8",
+    "#a855f7"
+  ],
+  "display": {
+    "brightness": 255,
+    "dim_brightness": 40,
+    "dim_timeout": 30,
+    "sleep_timeout": 60
+  },
+  "theme": "ha_dark"
+}

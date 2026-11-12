@@ -1,0 +1,49 @@
+name: Build and publish firmware release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Install PlatformIO
+        run: pip install platformio
+
+      - name: Build firmware
+        run: pio run
+
+      - name: Publish GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          VERSION="${RELEASE_TAG#v}"
+          FILES=(
+            "dist/cyd-ha-dashboard.${VERSION}.bin"
+            "dist/cyd-ha-dashboard.factory.${VERSION}.bin"
+            "dist/cyd-ha-dashboard.bin"
+            "dist/cyd-ha-dashboard.factory.bin"
+            "dist/ota.json"
+          )
+          if gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
+            echo "Release $RELEASE_TAG already exists, uploading assets..."
+            gh release upload "$RELEASE_TAG" "${FILES[@]}" --clobber
+          else
+            echo "Creating release $RELEASE_TAG..."
+            gh release create "$RELEASE_TAG" \
+              "${FILES[@]}" \
+              --title "CYD-HA-Dashboard ${RELEASE_TAG}" \
+              --generate-notes
+          fi

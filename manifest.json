@@ -1,0 +1,13 @@
+{
+  "name": "CYD-HA-Dashboard",
+  "version": "0.1.0",
+  "home_assistant_domain": "homeassistant",
+  "builds": [
+    {
+      "chipFamily": "ESP32",
+      "parts": [
+        { "path": "dist/cyd-ha-dashboard.factory.bin", "offset": 0 }
+      ]
+    }
+  ]
+}
