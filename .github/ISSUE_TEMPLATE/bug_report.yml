@@ -95,26 +95,6 @@ body:
       required: false
 
   - type: dropdown
-    id: theme
-    attributes:
-      label: Display Theme & Mode
-      description: Current theme applied on the device.
-      options:
-        - "Home Assistant (Dark)"
-        - "Home Assistant (Light)"
-        - "Slate Modern (Dark)"
-        - "Slate Modern (Light)"
-        - "OLED Pure Black"
-        - "OLED Clean White"
-        - "Forest Green (Dark)"
-        - "Forest Green (Light)"
-        - "Amber Retro (Dark)"
-        - "Amber Retro (Light)"
-        - "Default / Not sure"
-    validations:
-      required: false
-
-  - type: dropdown
     id: network_status
     attributes:
       label: Network & Home Assistant Connectivity
