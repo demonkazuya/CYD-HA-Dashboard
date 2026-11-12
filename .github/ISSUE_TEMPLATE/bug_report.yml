@@ -1,0 +1,126 @@
+name: "🐛 Bug Report"
+description: Report a bug or unexpected behavior with CYD-HA-Dashboard
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for reporting an issue! Please fill out the form below as completely as possible to help us diagnose and fix it quickly.
+
+        **Before submitting:** Verify that Home Assistant is running and your entities are functioning normally in the official Home Assistant dashboard.
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description of the Issue
+      description: A clear and concise description of what the problem is.
+      placeholder: "Explain what is happening..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction_steps
+    attributes:
+      label: Steps to Reproduce
+      description: Step-by-step instructions on how to replicate the issue.
+      placeholder: |
+        1. Power on the device
+        2. Navigate to '...'
+        3. Tap on slot '...'
+        4. Observe behavior
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected_vs_actual
+    attributes:
+      label: Expected vs Actual Behavior
+      description: What did you expect to happen, and what happened instead?
+      placeholder: "Expected: ... \nActual: ..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: What were you doing when this occurred?
+      description: e.g., initial setup, waking from screen sleep, opening a light RGB modal, or theme switching.
+      placeholder: "e.g., Device was connected, but after opening the climate modal..."
+    validations:
+      required: false
+
+  - type: dropdown
+    id: device_model
+    attributes:
+      label: CYD / ESP32 Hardware Model
+      description: Which display board are you using?
+      options:
+        - "ESP32-2432S028R (2.8\" Resistive Touch - Standard CYD)"
+        - "ESP32-2432S028C (2.8\" Capacitive Touch)"
+        - "ESP32-3248S035 (3.5\" Display)"
+        - "ESP32-2432S024 (2.4\" Display)"
+        - "Other / Custom Hardware"
+    validations:
+      required: true
+
+  - type: input
+    id: firmware_version
+    attributes:
+      label: Firmware Version
+      description: Version installed on the device (shown in Web Portal Tab 3 or /api/status).
+      placeholder: "e.g., v0.1.0"
+    validations:
+      required: true
+
+  - type: input
+    id: ha_version
+    attributes:
+      label: Home Assistant Version
+      description: Version of your Home Assistant server (Settings → System → About).
+      placeholder: "e.g., 2026.11.0"
+    validations:
+      required: false
+
+  - type: textarea
+    id: entity_types
+    attributes:
+      label: Affected Entity Types / Domains
+      description: What domain(s) are involved? (e.g., light, fan, cover, climate, scene, switch, sensor)
+      placeholder: "e.g., light.living_room_dimmer, climate.thermostat"
+    validations:
+      required: false
+
+  - type: textarea
+    id: serial_logs
+    attributes:
+      label: Serial Console Logs (115200 baud)
+      description: Connect the device via USB and paste logs from PlatformIO / Serial Monitor.
+      render: shell
+      placeholder: |
+        [UI] Touch at (160, 120)
+        [HA] Client connected: http://192.168.1.XX:8123
+        [HA] Error: ...
+    validations:
+      required: false
+
+  - type: textarea
+    id: visual_evidence
+    attributes:
+      label: Screenshots / Photos
+      description: Attach photos of your CYD screen or screenshots of the Web Portal.
+      placeholder: "Attach images here..."
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Pre-Submission Checklist
+      options:
+        - label: "I tested with adequate 5V power (not an underpowered USB hub or port)."
+          required: false
+        - label: "I verified that my Home Assistant token and base URL are correct."
+          required: false
+        - label: "I checked existing GitHub issues to make sure this is not a duplicate."
+          required: true
