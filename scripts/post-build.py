@@ -82,6 +82,7 @@ def post_build_action(source, target, env):
         "version": version_value,
         "firmware_url": f"https://github.com/demonkazuya/CYD-HA-Dashboard/releases/download/v{version_value}/cyd-ha-dashboard.bin",
         "url": f"https://github.com/demonkazuya/CYD-HA-Dashboard/releases/download/v{version_value}/cyd-ha-dashboard.bin",
+        "cors_url": f"https://raw.githubusercontent.com/demonkazuya/CYD-HA-Dashboard/main/dist/cyd-ha-dashboard.bin",
         "sha256": sha256,
         "size_bytes": size,
         "md5": md5,

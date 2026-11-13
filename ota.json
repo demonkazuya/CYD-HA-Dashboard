@@ -2,8 +2,9 @@
   "version": "0.1.1",
   "firmware_url": "https://github.com/demonkazuya/CYD-HA-Dashboard/releases/download/v0.1.1/cyd-ha-dashboard.bin",
   "url": "https://github.com/demonkazuya/CYD-HA-Dashboard/releases/download/v0.1.1/cyd-ha-dashboard.bin",
-  "sha256": "07703f7f063d525dc0bb75c94a71bedeae7c014640d22ba473aa7ea5bd300734",
-  "size_bytes": 1467488,
-  "md5": "f4c5f211eeb0f880172bf1d5b5ab22fb",
-  "size": 1467488
+  "cors_url": "https://raw.githubusercontent.com/demonkazuya/CYD-HA-Dashboard/main/dist/cyd-ha-dashboard.bin",
+  "sha256": "2f80cc7c504430e1f70506d9c51bb9c5892bca55f76afdce410f87f12d6ca52f",
+  "size_bytes": 1467744,
+  "md5": "16a4760d19d0ea7a7f7e71ef0ca7fcfc",
+  "size": 1467744
 }

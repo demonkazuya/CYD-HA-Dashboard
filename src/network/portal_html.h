@@ -980,11 +980,10 @@ function checkGitHubRelease() {
 
 function installGitHubRelease() {
   if (!latestOtaData) return;
-  var downloadUrl = latestOtaData.url || latestOtaData.firmware_url;
-  if (!downloadUrl) {
-    showAlert('No firmware URL found in release asset.', true);
-    return;
-  }
+  // GitHub Release asset downloads redirect to AWS/Azure blobs without CORS headers, which triggers "Failed to fetch" in browser.
+  // raw.githubusercontent.com explicitly provides 'Access-Control-Allow-Origin: *' allowing browser to stream binary directly!
+  var rawUrl = 'https://raw.githubusercontent.com/demonkazuya/CYD-HA-Dashboard/main/dist/cyd-ha-dashboard.bin';
+  var downloadUrl = latestOtaData.cors_url || rawUrl;
   if (!confirm('Download and install firmware v' + latestOtaData.version + ' from GitHub?')) return;
 
   var txt = document.getElementById('ota-status-text');
