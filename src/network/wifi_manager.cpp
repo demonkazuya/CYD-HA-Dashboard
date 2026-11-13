@@ -232,6 +232,7 @@ void WifiManager::setupCaptivePortal() {
     doc["hardware_model"] = HARDWARE_MODEL;
     doc["cpu_freq_mhz"] = ESP.getCpuFreqMHz();
     doc["uptime_s"] = millis() / 1000;
+    doc["reset_reason"] = (int)esp_reset_reason();
     doc["version"] = APP_VERSION;
     doc["app_name"] = APP_NAME;
     doc["ha_connected"] = _haConnectedCb ? _haConnectedCb() : false;

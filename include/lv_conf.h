@@ -32,7 +32,7 @@
 /*====================
    HAL SETTINGS
  *====================*/
-#define LV_DISP_DEF_REFR_PERIOD 25   /* [ms] Screen refresh period */
+#define LV_DISP_DEF_REFR_PERIOD 20   /* [ms] Screen refresh period (50 FPS for smooth scrolling) */
 #define LV_INDEV_DEF_READ_PERIOD 40  /* [ms] Touch input read period */
 #define LV_DPI_DEF              130  /* [px/inch] */
 

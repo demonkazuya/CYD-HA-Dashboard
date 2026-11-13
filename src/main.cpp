@@ -34,7 +34,8 @@ static SPIClass touchSpi = SPIClass(HSPI);
 static XPT2046_Touchscreen touch(XPT2046_CS, XPT2046_IRQ);
 
 static lv_disp_draw_buf_t draw_buf;
-static lv_color_t buf[config::SCREEN_WIDTH * config::DRAW_BUF_LINES];
+static lv_color_t buf1[config::SCREEN_WIDTH * config::DRAW_BUF_LINES];
+static lv_color_t buf2[config::SCREEN_WIDTH * config::DRAW_BUF_LINES];
 
 static WifiManager wifiManager;
 static HaClient haClient;
@@ -140,12 +141,48 @@ static const Widget* getWidgetForSlot(int slotIdx) {
 
 static void setContainerColor(lv_obj_t* obj, lv_color_t color) {
   if (!obj) return;
-  lv_obj_set_style_bg_color(obj, color, LV_PART_MAIN | LV_STATE_DEFAULT);
-  lv_obj_set_style_bg_color(obj, color, LV_PART_MAIN | LV_STATE_PRESSED);
-  lv_obj_set_style_bg_color(obj, color, LV_PART_MAIN | LV_STATE_FOCUSED);
+  if (lv_obj_get_style_bg_color(obj, LV_PART_MAIN).full != color.full) {
+    lv_obj_set_style_bg_color(obj, color, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(obj, color, LV_PART_MAIN | LV_STATE_PRESSED);
+    lv_obj_set_style_bg_color(obj, color, LV_PART_MAIN | LV_STATE_FOCUSED);
+  }
 }
 
-// Apply theme palette to screen background, header bar, and tile borders
+// Safe label update helper (avoids resetting running marquee / redraws if text didn't change)
+static inline bool safe_set_label_text(lv_obj_t* label, const char* new_text) {
+  if (!label || !new_text) return false;
+  const char* cur = lv_label_get_text(label);
+  if (!cur || strcmp(cur, new_text) != 0) {
+    lv_label_set_text(label, new_text);
+    return true;
+  }
+  return false;
+}
+
+// Configures smooth ping-pong scrolling with 3.5s pauses at start and end
+static void set_label_marquee(lv_obj_t* label, bool enable, bool forceReset = false) {
+  if (!label) return;
+  if (enable) {
+    bool modeChanged = (lv_label_get_long_mode(label) != LV_LABEL_LONG_SCROLL);
+    if (modeChanged) {
+      lv_obj_set_style_anim_speed(label, 25, LV_PART_MAIN); // 25 px/s (smooth 40-50 fps glide, no micro-stutter)
+      lv_label_set_long_mode(label, LV_LABEL_LONG_SCROLL);
+    }
+    // Only configure/reset anim delays when entering scroll mode or when text string actually changed
+    if (modeChanged || forceReset) {
+      lv_anim_t* a = lv_anim_get(label, NULL);
+      if (a) {
+        a->playback_delay = 3500; // Pause 3.5s when reaching the right end
+        a->repeat_delay = 3500;   // Pause 3.5s when back at the start
+        a->act_time = -3500;      // 3.5s pause before initial scroll
+      }
+    }
+  } else {
+    if (lv_label_get_long_mode(label) != LV_LABEL_LONG_DOT) {
+      lv_label_set_long_mode(label, LV_LABEL_LONG_DOT);
+    }
+  }
+}
 static void apply_theme() {
   const DashboardTheme& th = getThemeById(dashboardConfig.theme);
   if (ui_screen) {
@@ -181,29 +218,27 @@ static void update_slot_ui(int slotIdx) {
   int tileW = is3x2 ? 98 : 148;
 
   lv_obj_clear_flag(sw.container, LV_OBJ_FLAG_HIDDEN);
-  lv_label_set_text(sw.label_name, w->label.c_str());
 
   // Dynamic font sizing & marquee for Friendly Name
   int labelLen = w->label.length();
   int labelMaxNormal = is3x2 ? 10 : 16;
   int labelMaxSmall  = is3x2 ? 14 : 22;
 
-  if (labelLen > labelMaxSmall) {
-    lv_obj_set_style_text_font(sw.label_name, &lv_font_montserrat_12, LV_PART_MAIN);
-    lv_label_set_long_mode(sw.label_name, LV_LABEL_LONG_SCROLL_CIRCULAR);
-  } else if (labelLen > labelMaxNormal) {
-    lv_obj_set_style_text_font(sw.label_name, &lv_font_montserrat_12, LV_PART_MAIN);
-    lv_label_set_long_mode(sw.label_name, LV_LABEL_LONG_DOT);
-  } else {
-    lv_obj_set_style_text_font(sw.label_name, &lv_font_montserrat_14, LV_PART_MAIN);
-    lv_label_set_long_mode(sw.label_name, LV_LABEL_LONG_DOT);
+  const lv_font_t* nameFont = (labelLen > labelMaxNormal) ? &lv_font_montserrat_12 : &lv_font_montserrat_14;
+  if (lv_obj_get_style_text_font(sw.label_name, LV_PART_MAIN) != nameFont) {
+    lv_obj_set_style_text_font(sw.label_name, nameFont, LV_PART_MAIN);
   }
-  lv_obj_set_width(sw.label_name, tileW - 8);
-  lv_obj_align(sw.label_name, LV_ALIGN_BOTTOM_MID, 0, -6);
+  bool nameChanged = safe_set_label_text(sw.label_name, w->label.c_str());
+  set_label_marquee(sw.label_name, labelLen > labelMaxSmall, nameChanged);
+
+  if (lv_obj_get_width(sw.label_name) != (tileW - 8)) {
+    lv_obj_set_width(sw.label_name, tileW - 8);
+    lv_obj_align(sw.label_name, LV_ALIGN_BOTTOM_MID, 0, -6);
+  }
 
   if (sw.label_icon) {
     const char* sym = getRealMdiSymbol(w->icon, w->entityId, w->type);
-    lv_label_set_text(sw.label_icon, sym);
+    safe_set_label_text(sw.label_icon, sym);
   }
 
   HaEntity ent = haClient.getEntity(w->entityId);
@@ -217,7 +252,8 @@ static void update_slot_ui(int slotIdx) {
       bool isOn = (ent.state == "on" || ent.state == "scening" || ent.state == "open" || ent.state == "opening" || ent.state == "heat" || ent.state == "cool" || ent.state == "auto");
       lv_obj_set_style_text_font(sw.label_icon, &ui_font_mdi_44, LV_PART_MAIN);
       lv_obj_align(sw.label_icon, LV_ALIGN_CENTER, 0, -5);
-      lv_label_set_text(sw.label_state, "");
+      safe_set_label_text(sw.label_state, "");
+      set_label_marquee(sw.label_state, false);
 
       if (isClimate) {
         char cBuf[32];
@@ -228,13 +264,13 @@ static void update_slot_ui(int slotIdx) {
         } else {
           snprintf(cBuf, sizeof(cBuf), "%s", st.c_str());
         }
-        lv_label_set_text(sw.label_type, cBuf);
+        safe_set_label_text(sw.label_type, cBuf);
         lv_color_t typeCol = (ent.state == "heat") ? lv_color_hex(0xF87171) :
                              ((ent.state == "cool") ? lv_color_hex(0x38BDF8) :
                              ((ent.state == "auto") ? lv_color_hex(0x34D399) : lv_color_hex(th.tileIconIdle)));
         lv_obj_set_style_text_color(sw.label_type, typeCol, LV_PART_MAIN);
       } else {
-        lv_label_set_text(sw.label_type, isTriggered ? "ACTIVE" : (isAction ? (w->entityId.startsWith("scene.") ? "SCENE" : "SCRIPT") : (isCover ? "COVER" : "")));
+        safe_set_label_text(sw.label_type, isTriggered ? "ACTIVE" : (isAction ? (w->entityId.startsWith("scene.") ? "SCENE" : "SCRIPT") : (isCover ? "COVER" : "")));
         lv_obj_set_style_text_color(sw.label_type, isTriggered ? lv_color_hex(0x67E8F9) : (isCover ? lv_color_hex(0x38BDF8) : lv_color_hex(0xA5B4FC)), LV_PART_MAIN);
       }
 
@@ -295,7 +331,6 @@ static void update_slot_ui(int slotIdx) {
       } else {
         snprintf(valBuf, sizeof(valBuf), "%s", ent.state.c_str());
       }
-      lv_label_set_text(sw.label_state, valBuf);
 
       // Dynamic font sizing for sensor value based on string length & grid density
       int valLen = strlen(valBuf);
@@ -321,13 +356,20 @@ static void update_slot_ui(int slotIdx) {
         }
       }
 
-      lv_obj_set_style_text_font(sw.label_state, valFont, LV_PART_MAIN);
-      lv_obj_set_width(sw.label_state, tileW - 8);
+      if (lv_obj_get_style_text_font(sw.label_state, LV_PART_MAIN) != valFont) {
+        lv_obj_set_style_text_font(sw.label_state, valFont, LV_PART_MAIN);
+      }
+      if (lv_obj_get_width(sw.label_state) != (tileW - 8)) {
+        lv_obj_set_width(sw.label_state, tileW - 8);
+        lv_obj_align(sw.label_state, LV_ALIGN_CENTER, 0, 8);
+      }
       lv_obj_set_style_text_align(sw.label_state, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN);
-      lv_label_set_long_mode(sw.label_state, (valLen > (is3x2 ? 14 : 18)) ? LV_LABEL_LONG_SCROLL_CIRCULAR : LV_LABEL_LONG_DOT);
-      lv_obj_align(sw.label_state, LV_ALIGN_CENTER, 0, 8);
+
+      bool valChanged = safe_set_label_text(sw.label_state, valBuf);
+      set_label_marquee(sw.label_state, valLen > (is3x2 ? 14 : 18), valChanged);
+
       lv_obj_set_style_text_color(sw.label_state, lv_color_hex(th.tileText), LV_PART_MAIN);
-      lv_label_set_text(sw.label_type, "");
+      safe_set_label_text(sw.label_type, "");
       lv_obj_set_style_text_color(sw.label_name, lv_color_hex(th.tileText), LV_PART_MAIN);
       break;
     }
@@ -336,8 +378,9 @@ static void update_slot_ui(int slotIdx) {
       bool active = (ent.state == "on" || ent.state == "open" || ent.state == "detected" || ent.state == "problem");
       lv_obj_set_style_text_font(sw.label_icon, &ui_font_mdi_44, LV_PART_MAIN);
       lv_obj_align(sw.label_icon, LV_ALIGN_CENTER, 0, -5);
-      lv_label_set_text(sw.label_state, "");
-      lv_label_set_text(sw.label_type, "");
+      safe_set_label_text(sw.label_state, "");
+      set_label_marquee(sw.label_state, false);
+      safe_set_label_text(sw.label_type, "");
 
       if (active) {
         setContainerColor(sw.container, lv_color_hex(0xDC2626)); // Alert red
@@ -1244,12 +1287,11 @@ static void apply_ui_updates() {
   uiDirty = false;
 
   if (label_header_ha) {
-    lv_label_set_text(label_header_ha, MDI_HOME_ASSISTANT);
-    lv_obj_set_style_text_color(
-      label_header_ha,
-      queuedHaOk ? lv_color_hex(0x41BDF5) : lv_color_hex(0xEF4444),
-      LV_PART_MAIN
-    );
+    safe_set_label_text(label_header_ha, MDI_HOME_ASSISTANT);
+    lv_color_t targetColor = queuedHaOk ? lv_color_hex(0x41BDF5) : lv_color_hex(0xEF4444);
+    if (lv_obj_get_style_text_color(label_header_ha, LV_PART_MAIN).full != targetColor.full) {
+      lv_obj_set_style_text_color(label_header_ha, targetColor, LV_PART_MAIN);
+    }
   }
 
   for (int i = 0; i < MAX_SLOTS; i++) {
@@ -1528,6 +1570,7 @@ static void create_ui() {
     lv_obj_set_style_text_align(sw.label_name, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN);
     lv_obj_set_width(sw.label_name, TILE_W - 8);
     lv_label_set_long_mode(sw.label_name, LV_LABEL_LONG_DOT);
+    lv_obj_set_style_anim_speed(sw.label_name, 15, LV_PART_MAIN);
     lv_obj_align(sw.label_name, LV_ALIGN_BOTTOM_MID, 0, -6);
 
     // Value / State (Sensor text or state overlay)
@@ -1535,6 +1578,7 @@ static void create_ui() {
     lv_label_set_text(sw.label_state, "");
     lv_obj_set_style_text_font(sw.label_state, &lv_font_montserrat_26, LV_PART_MAIN);
     lv_obj_set_style_text_color(sw.label_state, lv_color_hex(0xFFFFFF), LV_PART_MAIN);
+    lv_obj_set_style_anim_speed(sw.label_state, 15, LV_PART_MAIN);
     lv_obj_align(sw.label_state, LV_ALIGN_CENTER, 0, 8);
 
     // Type / Badge (Centered at top of tile with 1px top margin)
@@ -1586,7 +1630,7 @@ void setup() {
   // 2-point touch calibration matching BambuDeck (LittleFS + NVS persistence)
   touchCal.begin(display, touch, false);
 
-  lv_disp_draw_buf_init(&draw_buf, buf, NULL, config::SCREEN_WIDTH * config::DRAW_BUF_LINES);
+  lv_disp_draw_buf_init(&draw_buf, buf1, buf2, config::SCREEN_WIDTH * config::DRAW_BUF_LINES);
 
   static lv_disp_drv_t disp_drv;
   lv_disp_drv_init(&disp_drv);
@@ -1600,8 +1644,8 @@ void setup() {
   lv_indev_drv_init(&indev_drv);
   indev_drv.type = LV_INDEV_TYPE_POINTER;
   indev_drv.read_cb = readTouch;
-  indev_drv.gesture_limit = 20;
-  indev_drv.gesture_min_velocity = 1;
+  indev_drv.gesture_limit = 45;       // Require distinct swipe across screen (prevents jitter taps triggering page turn)
+  indev_drv.gesture_min_velocity = 3; // Require intentional swipe velocity
   lv_indev_drv_register(&indev_drv);
 
   // Initialize LittleFS Dashboard Configuration
@@ -1661,5 +1705,5 @@ void loop() {
 
   apply_ui_updates();
   check_display_power_management();
-  delay(5);
+  delay(2);
 }

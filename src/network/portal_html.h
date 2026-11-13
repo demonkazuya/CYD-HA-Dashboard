@@ -50,6 +50,7 @@ static const char PORTAL_HTML[] PROGMEM = R"rawliteral(<!DOCTYPE html>
   .btn-success { background: var(--success); color: #0f172a; }
   .btn-danger { background: rgba(239, 68, 68, 0.2); color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.4); }
   .btn-danger:hover { background: rgba(239, 68, 68, 0.3); }
+  .btn:disabled { opacity: 0.35; cursor: not-allowed; pointer-events: none; }
   .btn-sm { padding: 6px 10px; font-size: 12px; }
   .page-nav { display: flex; gap: 8px; align-items: center; margin-bottom: 14px; }
   .page-nav select { flex: 1; }
@@ -112,10 +113,12 @@ static const char PORTAL_HTML[] PROGMEM = R"rawliteral(<!DOCTYPE html>
     <div class="card">
       <div class="card-title">
         <span>Active Page</span>
-        <div style="display:flex;gap:6px;">
-          <button class="btn btn-secondary btn-sm" onclick="addPage()">+ Add Page</button>
-          <button class="btn btn-secondary btn-sm" onclick="renamePage()">Rename</button>
-          <button class="btn btn-danger btn-sm" onclick="deletePage()">Delete</button>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;">
+          <button type="button" class="btn btn-secondary btn-sm" id="btn-page-move-left" onclick="movePage(-1)" title="Move page earlier">&#8592; Move Left</button>
+          <button type="button" class="btn btn-secondary btn-sm" id="btn-page-move-right" onclick="movePage(1)" title="Move page later">Move Right &#8594;</button>
+          <button type="button" class="btn btn-secondary btn-sm" onclick="addPage()">+ Add Page</button>
+          <button type="button" class="btn btn-secondary btn-sm" onclick="renamePage()">Rename</button>
+          <button type="button" class="btn btn-danger btn-sm" onclick="deletePage()">Delete</button>
         </div>
       </div>
 
@@ -573,6 +576,22 @@ function renderPageSelect() {
   if (p) {
     document.getElementById('page-grid').value = p.grid || '2x2';
   }
+  var btnL = document.getElementById('btn-page-move-left');
+  var btnR = document.getElementById('btn-page-move-right');
+  if (btnL) btnL.disabled = (activePageIdx <= 0);
+  if (btnR) btnR.disabled = (activePageIdx >= currentConfig.pages.length - 1);
+}
+
+function movePage(dir) {
+  var newIdx = activePageIdx + dir;
+  if (newIdx < 0 || newIdx >= currentConfig.pages.length) return;
+  syncCurrentSlotsToMemory();
+  var temp = currentConfig.pages[activePageIdx];
+  currentConfig.pages[activePageIdx] = currentConfig.pages[newIdx];
+  currentConfig.pages[newIdx] = temp;
+  activePageIdx = newIdx;
+  renderPageSelect();
+  renderSlots();
 }
 
 function onPageChange() {
