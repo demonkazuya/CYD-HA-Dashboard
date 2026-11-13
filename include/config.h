@@ -2,7 +2,7 @@
 #include <Arduino.h>
 
 #define APP_NAME "CYD-HA-Dashboard"
-#define APP_VERSION "0.1.0"
+#define APP_VERSION "0.1.1"
 #define HARDWARE_MODEL "ESP32-2432S028R (2.8\" Resistive Touch)"
 
 namespace config {

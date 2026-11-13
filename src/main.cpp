@@ -176,9 +176,30 @@ static void update_slot_ui(int slotIdx) {
   }
 
   const DashboardTheme& th = getThemeById(dashboardConfig.theme);
+  const DashboardPage& page = dashboardConfig.getActivePage();
+  bool is3x2 = (page.grid == "3x2");
+  int tileW = is3x2 ? 98 : 148;
 
   lv_obj_clear_flag(sw.container, LV_OBJ_FLAG_HIDDEN);
   lv_label_set_text(sw.label_name, w->label.c_str());
+
+  // Dynamic font sizing & marquee for Friendly Name
+  int labelLen = w->label.length();
+  int labelMaxNormal = is3x2 ? 10 : 16;
+  int labelMaxSmall  = is3x2 ? 14 : 22;
+
+  if (labelLen > labelMaxSmall) {
+    lv_obj_set_style_text_font(sw.label_name, &lv_font_montserrat_12, LV_PART_MAIN);
+    lv_label_set_long_mode(sw.label_name, LV_LABEL_LONG_SCROLL_CIRCULAR);
+  } else if (labelLen > labelMaxNormal) {
+    lv_obj_set_style_text_font(sw.label_name, &lv_font_montserrat_12, LV_PART_MAIN);
+    lv_label_set_long_mode(sw.label_name, LV_LABEL_LONG_DOT);
+  } else {
+    lv_obj_set_style_text_font(sw.label_name, &lv_font_montserrat_14, LV_PART_MAIN);
+    lv_label_set_long_mode(sw.label_name, LV_LABEL_LONG_DOT);
+  }
+  lv_obj_set_width(sw.label_name, tileW - 8);
+  lv_obj_align(sw.label_name, LV_ALIGN_BOTTOM_MID, 0, -6);
 
   if (sw.label_icon) {
     const char* sym = getRealMdiSymbol(w->icon, w->entityId, w->type);
@@ -275,7 +296,35 @@ static void update_slot_ui(int slotIdx) {
         snprintf(valBuf, sizeof(valBuf), "%s", ent.state.c_str());
       }
       lv_label_set_text(sw.label_state, valBuf);
-      lv_obj_set_style_text_font(sw.label_state, &lv_font_montserrat_26, LV_PART_MAIN);
+
+      // Dynamic font sizing for sensor value based on string length & grid density
+      int valLen = strlen(valBuf);
+      const lv_font_t* valFont = &lv_font_montserrat_26;
+      if (is3x2) {
+        if (valLen > 11) {
+          valFont = &lv_font_montserrat_12;
+        } else if (valLen > 8) {
+          valFont = &lv_font_montserrat_14;
+        } else if (valLen > 5) {
+          valFont = &lv_font_montserrat_20;
+        } else {
+          valFont = &lv_font_montserrat_26;
+        }
+      } else {
+        // 2x2 grid (wider tile 148px)
+        if (valLen > 14) {
+          valFont = &lv_font_montserrat_14;
+        } else if (valLen > 9) {
+          valFont = &lv_font_montserrat_20;
+        } else {
+          valFont = &lv_font_montserrat_26;
+        }
+      }
+
+      lv_obj_set_style_text_font(sw.label_state, valFont, LV_PART_MAIN);
+      lv_obj_set_width(sw.label_state, tileW - 8);
+      lv_obj_set_style_text_align(sw.label_state, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN);
+      lv_label_set_long_mode(sw.label_state, (valLen > (is3x2 ? 14 : 18)) ? LV_LABEL_LONG_SCROLL_CIRCULAR : LV_LABEL_LONG_DOT);
       lv_obj_align(sw.label_state, LV_ALIGN_CENTER, 0, 8);
       lv_obj_set_style_text_color(sw.label_state, lv_color_hex(th.tileText), LV_PART_MAIN);
       lv_label_set_text(sw.label_type, "");
